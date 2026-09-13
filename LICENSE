@@ -1,0 +1,33 @@
+MIT License
+
+Copyright (c) 2026 Jude Rosario
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+This repository builds on third-party robot description packages that are NOT
+covered by the licence above and are fetched by scripts/setup.sh:
+
+  Universal_Robots_ROS2_Description  (c) Universal Robots A/S            BSD-3
+  ros2_robotiq_gripper               (c) PickNik Robotics                BSD-3
+  ur_robotiq                         (c) Addison Sears-Collins           BSD-3
+
+The xacro files in robot_model/ are modifications of ur_robotiq and remain
+under its BSD-3 licence.
