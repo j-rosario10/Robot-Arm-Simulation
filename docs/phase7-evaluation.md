@@ -1,4 +1,4 @@
-# Phase 7 — Evaluation and demo deliverables
+# Phase 7: Evaluation and demo deliverables
 
 ## Tooling built (all runnable now; numbers await real demonstrations)
 
@@ -32,19 +32,19 @@ python -m puppet_pilot.tools.record_video side-by-side media/teleop.mp4 media/au
 Then paste `media/eval.json` numbers and the manifest summary into the
 README's results table.
 
-## Honest limitations (also in the README — do not soften these)
+## Honest limitations (also in the README, do not soften these)
 
 1. **No force feedback.** Vision teleop is position-controlled; the operator
    cannot feel grip force. Grip force is a *property* (a motor force
    ceiling derived from the gripper's drive train), never modulated live.
    On real hardware: current sensing on the gripper motor or a wrist F/T
    sensor, plus haptic feedback to the operator.
-2. **v1 "inspection" is a colour cue** standing in for measurement — the
+2. **v1 "inspection" is a colour cue** standing in for measurement, the
    Phase 8 upgrade replaces it with camera measurement against SPEC's
    tolerance bands.
-3. **Fixed top-down tool orientation** — a deliberate retargeting choice
+3. **Fixed top-down tool orientation**, a deliberate retargeting choice
    (docs/phase4-teleop.md); no tilted grasps.
 4. **The policy sees ground-truth object poses** from the simulator, not
-   estimated ones — sim-to-real would need a perception stack.
+   estimated ones, sim-to-real would need a perception stack.
 5. **Software-rendered GUI** (no GPU): the live view is not smooth; the
    physics and the recorded data are unaffected.

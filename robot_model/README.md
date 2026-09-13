@@ -6,7 +6,7 @@ here rather than vendored in place so it's obvious which bits are mine.
 
 The upstream `ur_robotiq` package combines a UR arm with a Robotiq 2F-85. It
 ships targeting a UR3e, and it was written against an older `ur_description`,
-so a straight retarget wasn't enough — two things had drifted underneath it.
+so a straight retarget wasn't enough, two things had drifted underneath it.
 
 ### `ur5e_urdf.xacro`
 
@@ -46,9 +46,8 @@ The top-level file that pulls both halves together. Replaces the upstream
 
 ---
 
-The gripper mounts to the arm with a single fixed joint at `ur5e_tool0` —
-UR's convention for the mounting flange, so no offsets need measuring. The
+The gripper mounts to the arm with a single fixed joint at `ur5e_tool0`, UR's convention for the mounting flange, so no offsets need measuring. The
 2F-85's six moving joints are driven by one input: `robotiq_85_left_knuckle_joint`
 is the only independent joint and the other five carry `<mimic>` tags slaved
 to it. RViz honours those. PyBullet does not, which is dealt with in
-`sim/gripper.py` (and is a good story — see the README).
+`sim/gripper.py` (and is a good story, see the README).

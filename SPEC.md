@@ -1,4 +1,4 @@
-# SPEC.md — task parameters
+# SPEC.md, task parameters
 
 Single source of truth for the Puppet to Pilot sorting task. Every value here is read at runtime. Nothing in the codebase hardcodes these numbers.
 
@@ -13,19 +13,19 @@ Four part types, drawn from small driveline/fastener hardware. All are sized to 
 | Part | Nominal dimensions | Grasp axis | Notes |
 |---|---|---|---|
 | Hex bolt M8 × 40 | Head 13 across flats × 5.3 tall, shank Ø8, overall length 40 (head + shank) | Across head flats | Grasp the head, not the shank |
-| Bushing | Ø25 OD × Ø15 ID × 20 tall | Across OD | Most forgiving part — use for early testing |
+| Bushing | Ø25 OD × Ø15 ID × 20 tall | Across OD | Most forgiving part, use for early testing |
 | Ring | Ø28 OD × Ø18 ID × 12 tall | Across OD | Thinner, needs better approach alignment |
-| Dowel pin | Ø10 × 45 long | Across diameter | Hardest — small cross-section, rolls easily |
+| Dowel pin | Ø10 × 45 long | Across diameter | Hardest, small cross-section, rolls easily |
 
 **Part mass:** treat all parts as steel, density 7850 kg/m³, computed from nominal geometry. Round to the nearest gram.
 
-**Friction:** lateral friction coefficient 0.6 for all parts. Gripper pad friction 0.9. Table friction 0.5. Rolling friction 0.001 and spinning friction 0.001 for all parts. These are tuning knobs — if grasps slip, raise pad friction before raising grip force.
+**Friction:** lateral friction coefficient 0.6 for all parts. Gripper pad friction 0.9. Table friction 0.5. Rolling friction 0.001 and spinning friction 0.001 for all parts. These are tuning knobs, if grasps slip, raise pad friction before raising grip force.
 
-Rolling friction is the textbook rolling-resistance coefficient for steel on steel. It was added after Phase 3 measurement: with no rolling resistance the dowel pins roll indefinitely (46–119 mm of travel in 3 s, still spinning at 36 rad/s), so episodes never settle and object poses drift throughout a recorded demonstration. The other three part types are rotationally stable either way.
+Rolling friction is the textbook rolling-resistance coefficient for steel on steel. It was added after Phase 3 measurement: with no rolling resistance the dowel pins roll indefinitely (46 to 119 mm of travel in 3 s, still spinning at 36 rad/s), so episodes never settle and object poses drift throughout a recorded demonstration. The other three part types are rotationally stable either way.
 
 ---
 
-## Good vs reject (v1 — colour cue)
+## Good vs reject (v1, colour cue)
 
 - **Good part:** steel grey, RGB `(0.60, 0.63, 0.65)`
 - **Reject part:** red, RGB `(0.75, 0.23, 0.17)`
@@ -36,10 +36,10 @@ The reject colour stands in for an out-of-spec dimension. It is a placeholder fo
 
 | Part | Controlled dimension | Nominal | Tolerance | Reject if |
 |---|---|---|---|---|
-| Hex bolt | Head across flats | 13.00 | ±0.20 | outside 12.80–13.20 |
-| Bushing | OD | 25.00 | ±0.15 | outside 24.85–25.15 |
-| Ring | OD | 28.00 | ±0.15 | outside 27.85–28.15 |
-| Dowel pin | Diameter | 10.00 | ±0.10 | outside 9.90–10.10 |
+| Hex bolt | Head across flats | 13.00 | ±0.20 | outside 12.80 to 13.20 |
+| Bushing | OD | 25.00 | ±0.15 | outside 24.85 to 25.15 |
+| Ring | OD | 28.00 | ±0.15 | outside 27.85 to 28.15 |
+| Dowel pin | Diameter | 10.00 | ±0.10 | outside 9.90 to 10.10 |
 
 When v2 lands, reject parts get their controlled dimension scaled to fall just outside the band rather than being colour-coded.
 
@@ -74,7 +74,7 @@ All three targets sit well within the UR5e's 850 mm reach with margin for approa
 
 ## Gripper
 
-Values for the stock Robotiq 2F-85. Replace these when the custom SolidWorks gripper is swapped in — this table is the only place they should need to change.
+Values for the stock Robotiq 2F-85. Replace these when the custom SolidWorks gripper is swapped in, this table is the only place they should need to change.
 
 | Parameter | Value |
 |---|---|
@@ -84,7 +84,7 @@ Values for the stock Robotiq 2F-85. Replace these when the custom SolidWorks gri
 | Driven joint | left finger |
 | Mimic joint | right finger, multiplier −1 |
 
-Grip force is a fixed ceiling, not a live-modulated command. Vision-based teleop has no force feedback — see the limitations section of the project README.
+Grip force is a fixed ceiling, not a live-modulated command. Vision-based teleop has no force feedback, see the limitations section of the project README.
 
 ---
 
@@ -114,13 +114,13 @@ An episode **succeeds** when all 8 parts have been moved from the bin to a shelf
 - Self-collision or a commanded pose outside joint limits
 - A part placed on the wrong shelf
 
-**Partial credit** is logged for analysis: parts correctly sorted out of 8. Use this rather than binary success when plotting policy performance against demonstration count — binary success is too coarse to show learning progress early on.
+**Partial credit** is logged for analysis: parts correctly sorted out of 8. Use this rather than binary success when plotting policy performance against demonstration count, binary success is too coarse to show learning progress early on.
 
 ---
 
 ## Teleop tuning
 
-Starting values. Expect to change these during Phase 4 — that is normal, not a defect.
+Starting values. Expect to change these during Phase 4, that is normal, not a defect.
 
 | Parameter | Value |
 |---|---|
@@ -142,7 +142,7 @@ Starting values. Expect to change these during Phase 4 — that is normal, not a
 | Observation | joint positions (6), joint velocities (6), gripper state (1), target object pose (7) |
 | Action | joint position deltas (6) + gripper command (1) |
 
-Split by episode, never by frame — frames within one episode are highly correlated, and a frame-level split leaks the validation set into training and produces meaningless validation numbers.
+Split by episode, never by frame, frames within one episode are highly correlated, and a frame-level split leaks the validation set into training and produces meaningless validation numbers.
 
 ---
 
