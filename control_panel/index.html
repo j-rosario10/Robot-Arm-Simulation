@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Puppet to Pilot — Control</title>
+<style>
+  :root {
+    --bg: #0f1216; --panel: #171c23; --panel2: #1e2530; --line: #2a323d;
+    --text: #e6ebf1; --dim: #93a1b0; --accent: #4f9cf9; --ok: #35c46b;
+    --off: #59626d; --warn: #f0b43a; --danger: #e5563f;
+    --font: -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font);
+         font-size: 15px; line-height: 1.5; }
+  header { padding: 20px 26px; border-bottom: 1px solid var(--line);
+           display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  header .sub { color: var(--dim); font-size: 13px; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 22px 26px 60px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 820px) { .row { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+          padding: 18px 20px; margin-bottom: 18px; }
+  .card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em;
+             color: var(--dim); margin: 0 0 14px; font-weight: 600; }
+  .big-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  button { font-family: var(--font); font-size: 14px; cursor: pointer; border-radius: 9px;
+           border: 1px solid var(--line); background: var(--panel2); color: var(--text);
+           padding: 10px 16px; transition: .12s; font-weight: 500; }
+  button:hover { border-color: var(--accent); }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #06101f; font-weight: 600; }
+  button.ghost { background: transparent; }
+  button.danger { color: var(--danger); border-color: #3a2622; }
+  button.danger:hover { border-color: var(--danger); }
+  button:disabled { opacity: .45; cursor: default; }
+  .comp { display: flex; align-items: center; gap: 12px; padding: 11px 0;
+          border-bottom: 1px solid var(--line); }
+  .comp:last-child { border-bottom: none; }
+  .dot { width: 11px; height: 11px; border-radius: 50%; background: var(--off); flex: none;
+         box-shadow: 0 0 0 0 rgba(53,196,107,.5); }
+  .dot.on { background: var(--ok); animation: pulse 2s infinite; }
+  .dot.busy { background: var(--warn); animation: pulse 1s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(53,196,107,.45); }
+                     70% { box-shadow: 0 0 0 7px rgba(53,196,107,0); }
+                     100% { box-shadow: 0 0 0 0 rgba(53,196,107,0); } }
+  .comp .name { flex: 1; }
+  .comp .name small { display: block; color: var(--dim); font-size: 12px; }
+  .comp .state { font-size: 12px; color: var(--dim); width: 66px; text-align: right; }
+  .comp button { padding: 6px 12px; font-size: 13px; }
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 620px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat { background: var(--panel2); border-radius: 9px; padding: 12px 14px; }
+  .stat .v { font-size: 24px; font-weight: 700; }
+  .stat .k { font-size: 12px; color: var(--dim); }
+  pre#log { background: #0a0d11; border: 1px solid var(--line); border-radius: 9px;
+            padding: 14px; font-size: 12.5px; line-height: 1.45; color: #c7d2de;
+            height: 300px; overflow: auto; white-space: pre-wrap; word-break: break-word; margin: 0; }
+  .logbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .logbar button { padding: 5px 11px; font-size: 12.5px; }
+  .logbar button.sel, button.sel { border-color: var(--accent); color: var(--accent); }
+  .note { color: var(--dim); font-size: 13px; margin-top: 10px; }
+  .note code { background: var(--panel2); padding: 1px 6px; border-radius: 5px; color: #cfe0f5; }
+  a { color: var(--accent); }
+  .pill { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--panel2);
+          color: var(--dim); border: 1px solid var(--line); }
+  .live { display: grid; grid-template-columns: 4fr 3fr; gap: 14px; }
+  @media (max-width: 820px) { .live { grid-template-columns: 1fr; } }
+  .view { background: #0a0d11; border: 1px solid var(--line); border-radius: 10px;
+          overflow: hidden; position: relative; aspect-ratio: 4 / 3; }
+  .view img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .view .tag { position: absolute; top: 8px; left: 10px; font-size: 11px; color: var(--dim);
+               background: rgba(10,13,17,.7); padding: 2px 8px; border-radius: 12px; }
+  .view .empty { position: absolute; inset: 0; display: flex; align-items: center;
+                 justify-content: center; color: var(--dim); font-size: 13px; text-align: center;
+                 padding: 20px; }
+  .view.stale img { opacity: .35; }
+  .epbar { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 12px; font-size: 13px;
+           color: var(--dim); }
+  .epbar b { color: var(--text); }
+</style>
+</head>
+<body>
+<header>
+  <span class="dot" id="hb" style="width:14px;height:14px"></span>
+  <div>
+    <h1>Puppet&nbsp;to&nbsp;Pilot</h1>
+    <div class="sub">local control panel — camera + robot, one place</div>
+  </div>
+  <span class="pill" id="conn" style="margin-left:auto">connecting…</span>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <h2>Live view</h2>
+    <div class="live">
+      <div class="view" id="robotview">
+        <img id="robotimg" alt="">
+        <span class="tag">robot (simulator)</span>
+        <div class="empty" id="robotempty">simulator not running — click Start</div>
+      </div>
+      <div class="view" id="camview">
+        <img id="camimg" alt="">
+        <span class="tag">camera (you)</span>
+        <div class="empty" id="camempty">camera not running</div>
+      </div>
+    </div>
+    <div class="epbar" id="epbar">episode: <b>–</b></div>
+    <div class="big-actions" style="margin-top:12px">
+      <span class="note" style="margin:0; align-self:center">Arm feels backwards? Flip an axis (takes effect live):</span>
+      <button id="flip-y" onclick="post('flip/y')">↔ left / right</button>
+      <button id="flip-x" onclick="post('flip/x')">↕ forward / back</button>
+      <button id="flip-z" onclick="post('flip/z')">⇅ up / down</button>
+    </div>
+    <div class="big-actions" style="margin-top:10px; align-items:center">
+      <span class="note" style="margin:0">Smoothness:</span>
+      <input type="range" id="smooth" min="0" max="100" value="50" style="width:220px"
+             oninput="$('smoothv').textContent = this.value + '%'"
+             onchange="post('smoothness/' + this.value)">
+      <span class="note" id="smoothv" style="margin:0; width:44px">50%</span>
+      <span class="note" style="margin:0">← snappier &nbsp;·&nbsp; steadier →</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>One click</h2>
+    <div class="big-actions">
+      <button class="primary" onclick="post('start_all')">▶ Start everything (with camera)</button>
+      <button onclick="post('start_demo')">▶ No-camera demo</button>
+      <button class="danger" onclick="post('stop_all')">■ Stop everything</button>
+    </div>
+    <div class="note">Start everything starts the camera, simulator and control nodes —
+      all shown in the live view above. Follow the calibration prompt in the camera view
+      (hold your hand <b>open</b>, then <b>pinched</b>); it retries until it can see your hand.
+      The no-camera demo drives the arm with a synthetic operator so you can watch the loop
+      without a webcam.</div>
+  </div>
+
+  <div class="row">
+    <div class="card">
+      <h2>Components</h2>
+      <div id="components"></div>
+    </div>
+
+    <div class="card">
+      <h2>Demonstrations &amp; policy</h2>
+      <div class="stat-grid">
+        <div class="stat"><div class="v" id="d-eps">–</div><div class="k">episodes recorded</div></div>
+        <div class="stat"><div class="v" id="d-succ">–</div><div class="k">success rate</div></div>
+        <div class="stat"><div class="v" id="d-sorted">–</div><div class="k">avg sorted / 8</div></div>
+        <div class="stat"><div class="v" id="d-pol">–</div><div class="k">policies</div></div>
+      </div>
+      <div class="big-actions" style="margin-top:16px">
+        <button id="btn-train" onclick="post('job/train')">⚙ Train policy</button>
+        <button id="btn-eval" onclick="post('job/evaluate')">📊 Evaluate</button>
+      </div>
+      <div id="evalbox" class="note"></div>
+      <div class="note" id="trainhint"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Live output</h2>
+    <div class="logbar" id="logbar"></div>
+    <pre id="log">select a component above to see its output</pre>
+  </div>
+
+  <div class="card">
+    <h2>First-run tips</h2>
+    <div class="note">
+      • Your motions may feel mirrored or sideways on the first live run — that's the
+        camera axis mapping, and it's expected. Tell Claude how it feels
+        (e.g. “pushing forward moves it left”) to have the signs flipped in
+        <code>teleop/retarget.py</code>.<br>
+      • <b>Camera framing:</b> the camera must see your shoulder, elbow, wrist <i>and</i> hand.
+        Use the camera view above — “pose” and “hand” both turn green when it can track you.
+        Aim the camera down / sit back until they do.<br>
+      • The robot view is rendered in software (no GPU) at ~5 fps — the physics and
+        recorded data run at full rate regardless.<br>
+      • You need about <b>50 successful demonstrations</b> before Train is worth running.
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let selected = null;
+let lastComponents = {};
+
+async function post(path) {
+  try { await fetch('/api/' + path, { method: 'POST' }); }
+  catch (e) {}
+  setTimeout(refresh, 400);
+}
+
+function compRow(key, c) {
+  const running = c.running;
+  const dot = `<span class="dot ${running ? 'on' : ''}"></span>`;
+  const btn = running
+    ? `<button class="danger" onclick="post('stop/${key}')">Stop</button>`
+    : `<button onclick="post('start/${key}')">Start</button>`;
+  return `<div class="comp">${dot}
+    <div class="name">${c.label}<small>${c.side === 'windows' ? 'Windows' : 'WSL'}</small></div>
+    <div class="state">${running ? 'running' : 'stopped'}</div>${btn}</div>`;
+}
+
+let logbarKey = '';
+function logButtons(components, jobs) {
+  const names = [...Object.keys(components), ...Object.keys(jobs)];
+  const key = names.join(',');
+  if (key !== logbarKey) {                       // rebuild only when names change
+    logbarKey = key;
+    $('logbar').innerHTML = names.map(n =>
+      `<button data-log="${n}" onclick="selectLog('${n}')">${n}</button>`
+    ).join('');
+  }
+  // update only the highlight each tick, leaving the buttons (and clicks) intact
+  document.querySelectorAll('#logbar button').forEach(b =>
+    b.classList.toggle('sel', b.dataset.log === selected));
+}
+
+function selectLog(name) { selected = name; refreshLog(); refresh(); }
+
+async function refreshLog() {
+  if (!selected) return;
+  try {
+    const r = await fetch('/api/log/' + selected);
+    const j = await r.json();
+    const el = $('log');
+    const atBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+    el.textContent = j.log || '(no output yet)';
+    if (atBottom) el.scrollTop = el.scrollHeight;
+  } catch (e) {}
+}
+
+async function refresh() {
+  try {
+    const r = await fetch('/api/status');
+    const s = await r.json();
+    $('conn').textContent = 'connected';
+    $('hb').classList.add('on');
+
+    $('components').innerHTML =
+      Object.entries(s.components).map(([k, c]) => compRow(k, c)).join('');
+    lastComponents = s.components;
+
+    const d = s.demos || {};
+    $('d-eps').textContent = d.episodes ?? 0;
+    $('d-succ').textContent = d.episodes ? Math.round((d.success_rate || 0) * 100) + '%' : '–';
+    $('d-sorted').textContent = d.mean_sorted ?? '–';
+    $('d-pol').textContent = (s.policies || []).length;
+
+    const training = s.jobs.train && s.jobs.train.running;
+    const evaluating = s.jobs.evaluate && s.jobs.evaluate.running;
+    $('btn-train').disabled = training;
+    $('btn-train').textContent = training ? '⚙ Training…' : '⚙ Train policy';
+    $('btn-eval').disabled = evaluating || (s.policies || []).length === 0;
+    $('btn-eval').textContent = evaluating ? '📊 Evaluating…' : '📊 Evaluate';
+    $('trainhint').textContent = (d.episodes || 0) < 5
+      ? 'Record demonstrations first (Start everything → complete a few sorts).'
+      : '';
+
+    if (s.eval) {
+      const e = s.eval;
+      $('evalbox').innerHTML = `Last evaluation: <b>${Math.round(e.success_rate*100)}%</b> success,
+        <b>${e.mean_sorted}/8</b> avg sorted` +
+        (e.mean_cycle_time ? `, ${e.mean_cycle_time}s cycle` : '') +
+        ` over ${e.episodes} episodes.`;
+    }
+
+    logButtons(s.components, s.jobs);
+    // reflect running jobs in the heartbeat colour
+  } catch (e) {
+    $('conn').textContent = 'panel offline';
+    $('hb').classList.remove('on');
+  }
+}
+
+// ---- live view: swap image sources with a cache-buster a few times a second.
+function tickImage(imgId, viewId, emptyId, name) {
+  const img = $(imgId), view = $(viewId), empty = $(emptyId);
+  const probe = new Image();
+  probe.onload = () => { img.src = probe.src; view.classList.remove('stale'); empty.style.display = 'none'; };
+  probe.onerror = () => { view.classList.add('stale'); empty.style.display = 'flex'; };
+  probe.src = '/live/' + name + '?t=' + Date.now();
+}
+// Staleness is judged by whether the status CONTENT keeps changing, never by
+// comparing clocks: WSL2's clock drifts from Windows' (badly, after sleep),
+// so an absolute-time comparison reported a live simulator as "stale".
+let lastStamp = null, lastChange = 0;
+async function tickStatus() {
+  try {
+    const r = await fetch('/live/status.json?t=' + Date.now(), { cache: 'no-store' });
+    if (!r.ok) throw 0;
+    const st = await r.json();
+    if (st.updated !== lastStamp) { lastStamp = st.updated; lastChange = Date.now(); }
+    if (Date.now() - lastChange > 4000) {
+      $('epbar').innerHTML = 'episode: <b>simulator paused / stale</b>'; return;
+    }
+    $('epbar').innerHTML =
+      `episode seed <b>${st.seed}</b> &nbsp;·&nbsp; ` +
+      `<b>${st.elapsed}s</b> / ${st.timeout}s &nbsp;·&nbsp; ` +
+      `sorted <b>${st.sorted}/${st.parts}</b> &nbsp;·&nbsp; ` +
+      `gripper <b>${st.gripper_opening_mm} mm</b> &nbsp;·&nbsp; ` +
+      `recording <b>${st.recording ? 'on' : 'off'}</b>` +
+      (st.last_outcome ? ` &nbsp;·&nbsp; last: <b>${st.last_outcome}</b>` : '');
+  } catch (e) { $('epbar').innerHTML = 'episode: <b>–</b>'; }
+}
+setInterval(() => tickImage('robotimg', 'robotview', 'robotempty', 'frame.jpg'), 250);
+setInterval(() => tickImage('camimg', 'camview', 'camempty', 'camera.jpg'), 250);
+setInterval(tickStatus, 1000);
+
+async function tickFlips() {
+  try {
+    const cfg = await (await fetch('/api/teleop_config')).json();
+    for (const axis of ['x', 'y', 'z']) {
+      $('flip-' + axis).classList.toggle('sel', !!cfg['flip_' + axis]);
+    }
+    if (document.activeElement !== $('smooth') && cfg.smoothness !== undefined) {
+      $('smooth').value = cfg.smoothness;
+      $('smoothv').textContent = cfg.smoothness + '%';
+    }
+  } catch (e) {}
+}
+setInterval(tickFlips, 2000);
+tickFlips();
+
+setInterval(refresh, 2000);
+setInterval(refreshLog, 1500);
+refresh();
+</script>
+</body>
+</html>
