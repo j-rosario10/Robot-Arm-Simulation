@@ -66,6 +66,10 @@ No webcam handy? `python -m puppet_pilot.tools.synthetic_operator` fakes the ope
 
 Move your arm in front of the camera and the gripper follows your wrist. Pinch thumb and index together to close the jaws, spread to open. The tool always points straight down. That's the whole interface.
 
+![Arm tracking](media/tracking.jpg)
+
+That's the camera view from the control panel. The overlay draws only what the controller actually consumes: the shoulder, elbow and wrist chain, and the blue line between thumb and index tip that becomes the gripper command. MediaPipe's pose model sees the whole body, but nothing else gets used. The bar in the corner is the calibrated pinch value, 0.97 here, so the jaws are nearly fully open.
+
 There's a calibration step at startup, hold your hand open then pinched, because everyone's hands are different sizes and the pinch distance has to be normalised to yours.
 
 ## Where it's at
