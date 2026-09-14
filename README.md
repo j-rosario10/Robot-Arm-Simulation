@@ -1,4 +1,4 @@
-# Puppet to Pilot
+# Robot Arm Simulation
 
 A simulated UR5e that I drive with my own arm through a webcam, and a policy that learns to do the job on its own from watching me.
 
@@ -119,6 +119,8 @@ ros2_ws/src/puppet_pilot/
   recording/          demonstration logging and replay
   learning/           dataset, policy, training, evaluation
 ```
+
+`puppet_pilot` is the internal package name, from when the project was called Puppet to Pilot. The code still uses it throughout.
 
 SPEC.md is the single source of truth for the task. Part dimensions, friction, shelf positions, episode rules, gripper stroke, all of it is parsed at runtime, and the parser refuses to fall back on defaults. Changing a number there changes the behaviour and fails the tests that restate it, which is exactly what I wanted.
 
