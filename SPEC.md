@@ -14,7 +14,7 @@ No machine learning, no training, no data collection.
 - A small webcam preview with my hand landmarks drawn on it, plus the gripper
   state, the bin counter, FPS and latency
 
-One command starts both: `pixi run launch`
+One command starts both: `pixi run launch` (or double-click `start.bat`)
 
 ## Controls
 
@@ -29,8 +29,8 @@ One command starts both: `pixi run launch`
 
 The gripper always points straight down. Only its position is controlled.
 
-Keys (click the webcam preview first): `C` re-centre the hand mapping,
-`R` reset the scene, `Q` quit.
+Keys: `C` re-centre the hand mapping and `Q` quit (webcam preview), `R` reset
+the scene (either window).
 
 ## How it is built
 
@@ -53,6 +53,7 @@ with `pixi run test`.
   and a bin.
 - **Grasping is "sticky":** when the gripper closes on an object it is welded
   to the gripper until the gripper opens. It does not rely on friction.
+  The object in grabbing range lights up, so you know when to pinch.
 - **Smoothing:** a One Euro filter on the hand position, so the arm is steady
   when my hand is still and quick when it moves.
 - **Safety box:** targets are clamped to a reachable region above the table.
@@ -61,3 +62,7 @@ with `pixi run test`.
   - webcam at 640x480, MediaPipe's lightest hand model, one hand
   - hand tracking, physics and drawing each run at their own rate, so a slow
     camera frame never freezes the simulation
+  - the preview window is drawn separately from tracking, so a stalled window
+    cannot delay commands to the arm
+  - ROS messages stay on this machine and use local networking, not shared
+    memory (see `launch/fastdds_udp_only.xml`)
