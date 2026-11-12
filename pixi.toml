@@ -19,3 +19,4 @@ opencv-python = "*"        # webcam + preview window
 [tasks]
 launch = "ros2 launch launch/puppet_pilot.launch.py"
 test = "pytest -q tests"
+hand = "python -m puppet_pilot.tracker"   # hand tracking on its own, no robot
