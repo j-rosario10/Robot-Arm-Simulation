@@ -70,3 +70,21 @@ def test_reset_puts_everything_back(sim):
     assert not sim.grasper.in_bin and sim.grasper.held is None
     obj = scene.OBJECTS[0]
     assert np.allclose(sim.data.body(obj.name).xpos[:2], obj.start, atol=1e-6)
+
+
+def test_object_in_reach_is_flagged_and_lit_up():
+    sim = ArmSim()
+    cube = sim.model.body_geomadr[sim.model.body("red_cube").id]
+    normal = sim.model.geom_rgba[cube].copy()
+    run(sim, 0.3)
+    assert sim.grasper.near is None                      # far away at home
+
+    sim.set_command((0.45, -0.10, 0.04), False)          # hover right over the red cube
+    run(sim, 2.0)
+    assert sim.grasper.near == "red_cube"
+    assert sim.model.geom_rgba[cube][1] > normal[1]      # brighter than its own colour
+
+    sim.set_command((0.45, 0.10, 0.30), False)           # move away again
+    run(sim, 2.0)
+    assert sim.grasper.near is None
+    assert np.allclose(sim.model.geom_rgba[cube], normal)

@@ -118,7 +118,7 @@ class ArmSimNode(Node):
         with self._lock:
             latency = self._latency_ms
         self.status_pub.publish(String(data=json.dumps({
-            "in_bin": len(g.in_bin), "objects": len(scene.OBJECTS), "held": g.held,
+            "in_bin": len(g.in_bin), "objects": len(scene.OBJECTS), "held": g.held, "near": g.near,
             "sim_fps": sim_fps, "command_hz": command_hz, "latency_ms": latency,
         })))
 

@@ -12,7 +12,6 @@ Listens to:
 """
 
 import json
-import time
 
 import cv2
 import rclpy
@@ -36,6 +35,20 @@ class HandTrackerNode(Node):
     def _on_status(self, msg: String) -> None:
         self.status = json.loads(msg.data)
 
+    def _status_lines(self) -> list:
+        """The simulator's numbers, as text for the preview window."""
+        s = self.status
+        if not s:
+            return ["waiting for the simulator..."]
+        if s["held"]:
+            doing = f"holding {s['held'].replace('_', ' ')} - open hand to drop"
+        elif s["near"]:
+            doing = f"pinch to grab {s['near'].replace('_', ' ')}"
+        else:
+            doing = "move over an object"
+        return [f"IN BIN {s['in_bin']} / {s['objects']}", doing,
+                f"sim {s['sim_fps']:.0f} steps/s   camera-to-arm {s['latency_ms']:.0f} ms"]
+
     def run(self) -> None:
         while rclpy.ok():
             rclpy.spin_once(self, timeout_sec=0)      # pick up any waiting messages
@@ -52,10 +65,7 @@ class HandTrackerNode(Node):
                 self.target_pub.publish(msg)
                 self.gripper_pub.publish(Bool(data=closed))
 
-                s = self.status
-                lines = [f"BIN {s['in_bin']}/{s['objects']}   holding: {s['held'] or '-'}",
-                         f"sim {s['sim_fps']:.0f} fps   camera-to-arm {s['latency_ms']:.0f} ms"] if s else \
-                        ["waiting for the simulator..."]
+                lines = self._status_lines()
                 draw_status(frame, self.pipeline, closed, lines)
                 cv2.imshow(WINDOW, frame)
 
