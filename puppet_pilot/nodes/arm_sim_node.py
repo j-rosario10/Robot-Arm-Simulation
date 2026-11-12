@@ -27,7 +27,7 @@ from puppet_pilot import scene
 from puppet_pilot.sim import ArmSim
 
 DRAW_HZ = 60
-STATUS_HZ = 10
+STATUS_HZ = 10    # how often the numbers on screen refresh
 KEY_R = 82   # key code the viewer reports for the R key
 
 
@@ -78,7 +78,7 @@ class ArmSimNode(Node):
             start = time.perf_counter()
             sim_start = sim.data.time
             next_draw = next_status = start
-            steps_done, fps_mark = 0, start
+            steps_done, draws_done, fps_mark = 0, 0, start
 
             while viewer.is_running() and rclpy.ok():
                 with self._lock:              # take the newest command
@@ -104,23 +104,41 @@ class ArmSimNode(Node):
                 now = time.perf_counter()
                 if now >= next_draw:
                     viewer.sync()             # redraw the window
+                    draws_done += 1
                     next_draw = now + 1.0 / DRAW_HZ
                 if now >= next_status:
                     with self._lock:
                         commands, self._commands = self._commands, 0
-                    self._publish_status(steps_done / (now - fps_mark), commands / (now - fps_mark))
-                    steps_done, fps_mark = 0, now
+                    span = now - fps_mark
+                    status = self._publish_status(steps_done / span, commands / span)
+                    self._show_text(viewer, status, draws_done / span)
+                    steps_done, draws_done, fps_mark = 0, 0, now
                     next_status = now + 1.0 / STATUS_HZ
                 time.sleep(0.0005)            # give other threads a turn
 
-    def _publish_status(self, sim_fps: float, command_hz: float) -> None:
+    def _publish_status(self, sim_fps: float, command_hz: float) -> dict:
         g = self.sim.grasper
         with self._lock:
             latency = self._latency_ms
-        self.status_pub.publish(String(data=json.dumps({
-            "in_bin": len(g.in_bin), "objects": len(scene.OBJECTS), "held": g.held, "near": g.near,
-            "sim_fps": sim_fps, "command_hz": command_hz, "latency_ms": latency,
-        })))
+        status = {"in_bin": len(g.in_bin), "objects": len(scene.OBJECTS), "held": g.held,
+                  "near": g.near, "sim_fps": sim_fps, "command_hz": command_hz,
+                  "latency_ms": latency}
+        self.status_pub.publish(String(data=json.dumps(status)))
+        return status
+
+    def _show_text(self, viewer, s: dict, draw_fps: float) -> None:
+        """Counter and speed numbers in the corner of the MuJoCo window."""
+        rows = [("In the bin", f"{s['in_bin']} / {s['objects']}"),
+                ("Holding", (s["held"] or "-").replace("_", " ")),
+                ("Physics", f"{s['sim_fps']:.0f} steps/s"),
+                ("Drawing", f"{draw_fps:.0f} fps"),
+                ("Hand updates", f"{s['command_hz']:.0f} per s"),
+                ("Camera to arm", f"{s['latency_ms']:.0f} ms"),
+                ("R", "reset")]
+        labels = chr(10).join(name for name, _ in rows)     # chr(10) is a line break
+        values = chr(10).join(value for _, value in rows)
+        viewer.set_texts((mujoco.mjtFont.mjFONT_NORMAL, mujoco.mjtGridPos.mjGRID_TOPRIGHT,
+                          labels, values))
 
 
 def main() -> None:

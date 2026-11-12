@@ -23,6 +23,8 @@ HOME_QPOS = [3.1416, -1.5708, 1.5708, -1.5708, -1.5708, 0.0]
 ARM_JOINTS = ["shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint",
               "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"]
 TCP_SITE = "grip_pinch"       # the point between the fingertips that we steer
+ARM_STIFFNESS_SCALE = 2.0     # motor spring strength, relative to the stock model
+ARM_SETTLE_TIME = 0.06        # seconds; smaller = arm follows faster (too small = wobble)
 GRIPPER_BODY = "grip_base"    # objects get welded to this when grabbed
 GRIPPER_ACTUATOR = "grip_fingers_actuator"   # 0 = open, 255 = closed
 
@@ -75,6 +77,10 @@ def build_model() -> mujoco.MjModel:
     spec.visual.headlight.diffuse = [0.6, 0.6, 0.6]
     spec.visual.global_.offwidth, spec.visual.global_.offheight = 1280, 960
     world.add_light(pos=[0.4, 0.0, 1.8], dir=[0, 0, -1], diffuse=[0.5, 0.5, 0.5])
+    # a soft blue-grey backdrop instead of plain black
+    spec.add_texture(name="sky", type=mujoco.mjtTexture.mjTEXTURE_SKYBOX,
+                     builtin=mujoco.mjtBuiltin.mjBUILTIN_GRADIENT,
+                     rgb1=[0.55, 0.65, 0.78], rgb2=[0.16, 0.18, 0.22], width=256, height=1536)
 
     # Table: a slab whose top surface is exactly z = 0, and a floor below it.
     world.add_geom(name="table", type=box, size=[0.50, 0.60, 0.02],
@@ -109,7 +115,18 @@ def build_model() -> mujoco.MjModel:
                           objtype=mujoco.mjtObj.mjOBJ_BODY,
                           name1=GRIPPER_BODY, name2=obj.name, active=False)
 
-    return spec.compile()
+    model = spec.compile()
+
+    # Make the arm's motors snappier. Each motor is a spring pulling the joint
+    # to its target, plus a brake. The stock brake is strong, so the arm takes
+    # about half a second to catch up. A lighter brake cuts that to roughly
+    # 0.15 s, still without overshooting.
+    for i in range(len(ARM_JOINTS)):
+        stiffness = model.actuator_gainprm[i, 0] * ARM_STIFFNESS_SCALE
+        model.actuator_gainprm[i, 0] = stiffness
+        model.actuator_biasprm[i, 1] = -stiffness
+        model.actuator_biasprm[i, 2] = -stiffness * ARM_SETTLE_TIME
+    return model
 
 
 def reset(model: mujoco.MjModel, data: mujoco.MjData) -> None:
