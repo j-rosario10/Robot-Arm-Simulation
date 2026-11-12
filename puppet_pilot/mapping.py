@@ -20,11 +20,11 @@ from puppet_pilot.hand_math import HandReading
 @dataclass
 class MappingConfig:
     # Middle of the arm's workspace, in metres (x forward, y left, z up).
-    home: tuple = (0.50, 0.0, 0.30)
+    home: tuple = (0.50, 0.0, 0.25)
     # The arm is never sent outside this box. z_min keeps the fingers off the table.
     x_range: tuple = (0.30, 0.75)
     y_range: tuple = (-0.40, 0.40)
-    z_range: tuple = (0.155, 0.55)
+    z_range: tuple = (0.03, 0.50)
     # How far the arm moves for a hand movement.
     gain_side: float = 1.1    # metres per image-width of hand travel
     gain_height: float = 0.9  # metres per image-height of hand travel
@@ -71,8 +71,9 @@ class HandToArm:
         cx, cy, csize = self._centre
         c = self.config
 
-        # The preview is mirrored like a mirror, and we watch the arm from
-        # behind, so "hand to my right" must move the arm to its right (-y).
+        # The webcam image is mirrored first (like looking in a mirror), and
+        # the simulator camera faces the robot. So moving my hand to my right
+        # moves the arm toward the right of the screen, which is +y.
         side = (hand.x - cx) * c.gain_side
         up = (cy - hand.y) * c.gain_height            # image y grows downward
         reach = math.log2(hand.size / csize) * c.gain_reach  # bigger = closer = forward
