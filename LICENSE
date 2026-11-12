@@ -22,12 +22,9 @@ SOFTWARE.
 
 ---
 
-This repository builds on third-party robot description packages that are NOT
-covered by the licence above and are fetched by scripts/setup.sh:
+The robot models in models/ are NOT covered by the licence above. They come
+from MuJoCo Menagerie (github.com/google-deepmind/mujoco_menagerie) and keep
+their own licences, included alongside them:
 
-  Universal_Robots_ROS2_Description  (c) Universal Robots A/S            BSD-3
-  ros2_robotiq_gripper               (c) PickNik Robotics                BSD-3
-  ur_robotiq                         (c) Addison Sears-Collins           BSD-3
-
-The xacro files in robot_model/ are modifications of ur_robotiq and remain
-under its BSD-3 licence.
+  models/universal_robots_ur5e   see models/universal_robots_ur5e/LICENSE
+  models/robotiq_2f85            see models/robotiq_2f85/LICENSE

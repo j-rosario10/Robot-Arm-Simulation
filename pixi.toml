@@ -1,0 +1,21 @@
+# One file that describes the whole environment: ROS 2 Jazzy, MuJoCo,
+# MediaPipe and OpenCV, all running natively on Windows.
+#   pixi install        -> downloads everything (first time only)
+#   pixi run launch     -> starts the project
+[workspace]
+name = "puppet-pilot"
+channels = ["robostack-jazzy", "conda-forge"]
+platforms = ["win-64"]
+
+[dependencies]
+ros-jazzy-ros-base = "*"   # rclpy, ros2 launch, standard message types
+pytest = "*"
+
+[pypi-dependencies]
+mujoco = "*"               # physics + viewer window
+mediapipe = "*"            # hand tracking
+opencv-python = "*"        # webcam + preview window
+
+[tasks]
+launch = "ros2 launch launch/puppet_pilot.launch.py"
+test = "pytest -q tests"

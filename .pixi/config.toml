@@ -1,0 +1,3 @@
+# The ros2 command breaks if its Python lives under a path with spaces,
+# so the environment is stored in pixi's cache folder instead of here.
+detached-environments = true

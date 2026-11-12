@@ -1,45 +1,10 @@
-# Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.venv/
-venv/
+.pytest_cache/
 
-# ROS 2 colcon output
-ros2_ws/build/
-ros2_ws/install/
-ros2_ws/log/
+# pixi keeps its downloaded environment out of git (config.toml is ours)
+.pixi/*
+!.pixi/config.toml
 
-# Upstream packages fetched by scripts/setup.sh (not ours to vendor;
-# ur_description alone is ~86 MB of meshes)
-ros2_ws/src/ur_description/
-ros2_ws/src/ros2_robotiq_gripper/
-ros2_ws/src/ur_robotiq/
-
-# Generated at build time from the xacro + SPEC.md
-ros2_ws/src/puppet_pilot/generated/
-
-# MediaPipe .task bundles - download_models.py fetches these (~13 MB)
-windows_side/models/
-
-# Control panel runtime state
-control_panel/logs/
-control_panel/live/
-control_panel/teleop_config.json
-
-# Recorded demonstrations and trained policies. These are mine, not yours -
-# record your own; the manifest is rebuilt automatically.
-data/demos/*.npz
-data/demos/manifest.json
-data/policies/
-
-# Evaluation output
-media/eval.json
-media/learning_curve.*
-media/*.mp4
-
-# Editor
-.vscode/
-.idea/
-*.swp
-.DS_Store
+# ROS 2 log files
+log/
