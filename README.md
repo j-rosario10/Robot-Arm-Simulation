@@ -5,6 +5,10 @@ A simulated robot arm that I control with my hand through a webcam.
 Move your hand and the arm follows. Pinch to grab an object, carry it over
 the bin, and open your hand to drop it in.
 
+![The simulated robot arm reaching for an object](media/simulator.png)
+
+<img src="media/camera.webp" alt="Webcam view with tracking drawn on my arm and a pinch reading" width="480">
+
 ## Setup
 
 You need Windows and a webcam.
